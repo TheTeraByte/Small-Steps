@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background1_final"
+     >
+
+    <ImageView
+        android:id="@+id/image_view_gift"
+        android:contentDescription="@string/image_gift_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="130dp"
+        android:src="@drawable/gift_box" />
+
+    <TextView
+        android:id="@+id/gift_yourself_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="65dp"
+        android:text="@string/gift_yourself_text_content" 
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        />
+
+    <EditText
+        android:id="@+id/enter_reward_details_textfield"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/gift_yourself_text"
+        android:layout_below="@+id/image_view_gift"
+        android:layout_marginTop="34dp"
+        android:hint="@string/hint_create_reward" >
+
+        <requestFocus />
+    </EditText>
+
+    <Button
+        android:id="@+id/add_reward_to_list_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/enter_reward_details_textfield"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:padding="9dp"
+        android:background="#FF0000"
+        android:fontFamily="sans-serif"
+        android:textSize="15sp"
+        android:textColor="#FFFFFF"
+        android:text="@string/add_reward_button_text" />
+
+</RelativeLayout>

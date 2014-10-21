@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/background1_final"
+     >
+
+    <ImageView
+        android:id="@+id/reward_star_image"
+        android:contentDescription="@string/image_star"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="109dp"
+        android:src="@drawable/blue_gift" />
+
+    <TextView
+        android:id="@+id/generic_congratulations_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="67dp"
+        android:text="@string/congratulations_text"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        />
+
+    <TextView
+        android:id="@+id/daily_reward_description_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/generic_congratulations_text"
+        android:layout_below="@+id/reward_star_image"
+        android:layout_marginTop="42dp"
+        android:fontFamily="Arial"
+        android:text="@string/hello_world"
+        android:textSize="18sp" />
+
+</RelativeLayout>

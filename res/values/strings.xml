@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Small Steps</string>
+    <string name="action_settings">Settings</string>
+    <string name="about_the_app_text">This habit tracking app was made by\nTushar Bhargava [tushar1995@gmail.com].\n Image credits coming soon. </string>
+    <string name="hello_world">Hello world!</string>
+    <string name="small_steps_inspiration">What saves a man is to take a step.\nThen another step. ~ C.S. Lewis</string>
+	<string name="academic">Academic</string>
+	<string name="about_the_app">About</string>
+	<string name="create_habit_text">Create New Habit</string>
+	<string name="hint_habit_name">Enter a name for your habit</string>
+	<string name="hint_habit_description">Describe habit (eg:jog for 5m)</string>
+	<string name="hint_date_habit_started">Date habit was started:</string>
+	<string name="new_habit_button_text">New habit</string>
+	<string name="new_habit_activity">Create A New Habit</string>
+	<string name="submit_button_text">Submit</string>
+	<string name="submit_button_habit">Create habit</string>
+	<string name="habit_under_category">Habits under category</string>
+	<string name="see_habits">See habits</string>
+	<string name="checklist_button_text">Checklist</string>
+	<string name="daily_checklist">Daily Habit Checklist</string>
+	<string name="ok">OK</string>
+	<string name="current_level_string">Current level: </string>
+	<string name="avatar_display_text">Your avatar level</string>
+	<string name="see_avatar">See your current avatar</string>
+	<string name="generic_avatar_description">This image shows the game avatar.</string>
+	<string name="add_reward_button_text">Add to list</string>
+	<string name="image_star">Image of a star</string>
+	<string name="image_gift_box">Image of a gift box</string>
+	<string name="activity_create_daily_reward">Create a new daily reward</string>
+	<string name="gift_yourself_text_content">Add a new daily reward!</string>
+	<string name="hint_create_reward">Enter reward description</string>
+	<string name="hint_habit_duration">Enter desired habit duration (minutes)</string>
+	<string name="hint_total_days">Enter no. of days habit performed</string>
+	<string name="congratulations_text">You have won a reward!</string>
+	<string name="cancel">Cancel</string>
+	<string name="daily_reward">Daily Reward</string>
+	<string name="image_main_description">Image representing category</string>
+	<string-array name="habit_categories">
+	    <item>Academic</item>
+	    <item>Computer Science</item>
+	    <item>Financial</item>
+	    <item>Health</item>
+	    <item>Relationships</item>
+	    <item>Writing</item>
+	</string-array>
+	<string name="habit_category_prompt">Habit category</string>
+</resources>

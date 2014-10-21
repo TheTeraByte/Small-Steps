@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="in.tusharbhargava.habitapp"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="17" />
+    
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="in.tusharbhargava.habitapp.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="in.tusharbhargava.habitapp.CreateHabitActivity"
+            android:label="@string/new_habit_activity" >
+            
+        </activity>
+        
+        <activity
+            android:name="in.tusharbhargava.habitapp.DisplayHabitsByCategory"
+            android:label="@string/habit_under_category">
+            
+        </activity>
+        
+        <activity
+            android:name="in.tusharbhargava.habitapp.DailyChecklistActivity"
+            android:label="@string/daily_checklist">
+        </activity>
+        
+        <activity
+            android:name="in.tusharbhargava.habitapp.DailyRewardActivity"
+            android:label="@string/daily_reward"
+            >
+        </activity>
+        
+        <activity
+            android:name="in.tusharbhargava.habitapp.CreateDailyRewardActivity"
+            android:label="@string/activity_create_daily_reward"
+        >
+        </activity>
+        
+        <activity
+            android:name="in.tusharbhargava.habitapp.DisplayLevelAndAvatarActivity"
+            android:label="@string/avatar_display_text"
+            >
+            
+        </activity>
+        
+        <activity
+            android:name="in.tusharbhargava.habitapp.AboutTheAppActivity"
+            android:label="@string/about_the_app"
+        >
+            
+        </activity>
+        <service
+            android:name="in.tusharbhargava.habitapp.DailyChecklistReminderService"
+        >
+            
+        </service>
+    </application>
+
+</manifest>
