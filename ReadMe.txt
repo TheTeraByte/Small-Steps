@@ -12,4 +12,4 @@ I have provided an installable .apk file within my submission folder.
 
 Project Screenshots:
 
-http://tusharbhargava.in/coding-lab/ (scroll to bottom half of page)
+http://tusharbhargava.in/app-showcase-small-steps/
