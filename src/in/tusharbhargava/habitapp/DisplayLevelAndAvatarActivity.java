@@ -1,27 +1,32 @@
 package in.tusharbhargava.habitapp;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+/**
+ * Displays the user's current avatar and level. These avatars
+ * are representative of the user's progress and are dinosaur themed.
+ * 
+ * @author Tushar Bhargava
+ */
+
 public class DisplayLevelAndAvatarActivity extends Activity
 {
-
+	// instance variables
+	private ExtStorageWriterAndReader _reader;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.level_and_avatar_display_activity);
+		
+		// Initializing file reader
+		_reader=new ExtStorageWriterAndReader();
 		
 		// Getting control of the TextView and the ImageView
 		TextView text_view=(TextView)findViewById(R.id.level_display_text);
@@ -35,38 +40,38 @@ public class DisplayLevelAndAvatarActivity extends Activity
 		int relationships_habit_level=0;
 		int writing_habit_level=0;
 		
-		String academic_habit_level_s=getFileContent("Academic/category_score");
+		String academic_habit_level_s=_reader.getFileContent("Academic/category_score");
 		if(academic_habit_level_s!=null)
 		{
 			academic_habit_level_s=academic_habit_level_s.trim();
 			academic_habit_level=Integer.parseInt(academic_habit_level_s);
 		}// end if statement
 		
-		String computer_science_habit_level_s=getFileContent("Computer Science/category_score");
+		String computer_science_habit_level_s=_reader.getFileContent("Computer Science/category_score");
 		if(computer_science_habit_level_s!=null)
 		{
 			computer_science_habit_level=Integer.parseInt(computer_science_habit_level_s.trim());
 		}// end if statement
 		
-		String financial_habit_level_s=getFileContent("Financial/category_score");
+		String financial_habit_level_s=_reader.getFileContent("Financial/category_score");
 		if(financial_habit_level_s!=null)
 		{
 			financial_habit_level=Integer.parseInt(financial_habit_level_s.trim());
 		}// end if statement
 		
-		String health_habit_level_s=getFileContent("Health/category_score");
+		String health_habit_level_s=_reader.getFileContent("Health/category_score");
 		if(health_habit_level_s!=null)
 		{
 			health_habit_level=Integer.parseInt(health_habit_level_s.trim());
 		}// end if statement
 		
-		String relationships_habit_level_s=getFileContent("Relationships/category_score");
+		String relationships_habit_level_s=_reader.getFileContent("Relationships/category_score");
 		if(relationships_habit_level_s!=null)
 		{
 			relationships_habit_level=Integer.parseInt(relationships_habit_level_s.trim());
 		}// end if statement
 		
-		String writing_habit_level_s=getFileContent("Writing/category_score");
+		String writing_habit_level_s=_reader.getFileContent("Writing/category_score");
 		if(writing_habit_level_s!=null)
 		{
 			writing_habit_level=Integer.parseInt(writing_habit_level_s.trim());
@@ -146,60 +151,4 @@ public class DisplayLevelAndAvatarActivity extends Activity
 		}// end switch statement
 		return true;
 	}// end onOptionsItemSelected
-
-
-	
-	
-	/*----------------------------Standard Methods------------------------------- */
-	
-
-	/**
-	 * This function returns file content as a string from external storage.
-	 * @param The name of the file (which is same as the habit name with a post-fix)
-	 * must be provided. 
-	 * @return content of file
-	 */
-	public String getFileContent(String fileName) 
-	{
-		String temp;
-		StringBuilder build_string=null;
-		FileInputStream input;
-		InputStreamReader input_stream_reader;
-		BufferedReader buffered_reader;
-		
-		try
-		{
-		input=new FileInputStream(new File(Environment.getExternalStorageDirectory()+"/SmallStepsData/"+fileName+".txt"));
-		input_stream_reader=new InputStreamReader(input);
-		buffered_reader=new BufferedReader(input_stream_reader,8192);
-		build_string=new StringBuilder();
-		while((temp=buffered_reader.readLine())!=null)
-		{
-			build_string.append(temp+"\r\n");
-		}// end while loop
-				
-		// Closing the streams
-		buffered_reader.close();
-		
-		}// end try block
-		
-		catch (FileNotFoundException f)
-		{	
-			f.printStackTrace();
-			// If file does not exist than we return null to calling method.
-			return null;
-		}	
-		
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		// Printing the content
-		//System.out.println("Content of file (according to my reader): "+build_string.toString());
-		
-		return build_string.toString();
-	}// end method
-	
-
-	
 }// end class

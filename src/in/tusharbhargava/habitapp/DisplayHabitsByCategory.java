@@ -1,14 +1,10 @@
 package in.tusharbhargava.habitapp;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+
 import java.util.ArrayList;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,25 +16,27 @@ import android.widget.Toast;
 /**
  * This class reads the habit details from the internal storage and displays them
  * in list view. 
+ * 
  * @author Tushar Bhargava
- *
  */
 
 public class DisplayHabitsByCategory extends FragmentListActivity {
 
 	// Global variables
+	private ExtStorageWriterAndReader _reader;
+	// The search key for retrieving habit data being passed between activities.
 	public static final String KEY_HABIT_DATA="habit_data";
-	private Bundle _bundle;
 	private String category;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
-		_bundle=savedInstanceState;
-		
+				
 		// Getting intent from previous activity
 		Intent intent=this.getIntent();
+		
+		// Initializing file reader
+		_reader=new ExtStorageWriterAndReader();
 		
 		// Getting the category from the previous activity
 		category=intent.getExtras().getString("category");
@@ -50,7 +48,7 @@ public class DisplayHabitsByCategory extends FragmentListActivity {
 		ArrayList<String> values_to_display=new ArrayList<String>();
 		
 		// Getting all the habit names under this category
-		String habits_under_category_text=getFileContent("/"+category+"/habits_under_category.txt");
+		String habits_under_category_text=_reader.getFileContent("/"+category+"/habits_under_category.txt");
 		// If there is no habit under category
 		if(habits_under_category_text==null)
 		{
@@ -59,7 +57,7 @@ public class DisplayHabitsByCategory extends FragmentListActivity {
 			finish();
 			startActivity(return_to_main);
 		}// end if statement
-	//	System.out.println("'Habits under category text text: "+habits_under_category_text);
+	
 		
 		else
 		{
@@ -95,7 +93,7 @@ public class DisplayHabitsByCategory extends FragmentListActivity {
 	{
 		String selected_habit_name=list_view.getItemAtPosition(position).toString();
 		// We use the habit name to extract all the relevant data
-		String data_to_display=" Habit name: "+selected_habit_name+"\n Habit description: "+getFileContent("\\"+category+"\\"+selected_habit_name+"_description.txt")+"\n Total Days Performed: "+getFileContent("\\"+category+"\\"+selected_habit_name+"_totalDays.txt")+"\n Current streak: "+getFileContent("\\"+category+"\\"+selected_habit_name+"_streak.txt")+"\n Habit Current Duration: "+getFileContent("\\"+category+"\\"+selected_habit_name+"_duration.txt")+" minutes";
+		String data_to_display=" Habit name: "+selected_habit_name+"\n Habit description: "+_reader.getFileContent("\\"+category+"\\"+selected_habit_name+"_description.txt")+"\n Total Days Performed: "+_reader.getFileContent("\\"+category+"\\"+selected_habit_name+"_totalDays.txt")+"\n Current streak: "+_reader.getFileContent("\\"+category+"\\"+selected_habit_name+"_streak.txt")+"\n Habit Current Duration: "+_reader.getFileContent("\\"+category+"\\"+selected_habit_name+"_duration.txt")+" minutes";
 
 		// Storing data in the bundle which we'll pass to the HabitDataDialogFragment
 		// class
@@ -146,51 +144,5 @@ public class DisplayHabitsByCategory extends FragmentListActivity {
 		}// end switch statement
 		return true;
 	}// end onOptionsItemSelected
-
-	
-	
-	/*-------------------------------Standard Methods-------------------------- */
-	
-	/**
-	 * This function returns file content as a string from external storage.
-	 * @param The name of the file (which is same as the habit name with a post-fix)
-	 * must be provided. 
-	 * @return content of file
-	 */
-	public String getFileContent(String fileName) 
-	{
-		String temp;
-		StringBuilder build_string=null;
-		FileInputStream input;
-		InputStreamReader input_stream_reader;
-		BufferedReader buffered_reader;
-		
-		try
-		{
-		input=new FileInputStream(new File(Environment.getExternalStorageDirectory()+"/SmallStepsData"+fileName));
-		input_stream_reader=new InputStreamReader(input);
-		buffered_reader=new BufferedReader(input_stream_reader,8192);
-		build_string=new StringBuilder();
-		while((temp=buffered_reader.readLine())!=null)
-		{
-			build_string.append(temp+"\r\n");
-		}// end while loop
-				
-		// Closing the streams
-		buffered_reader.close();
-		
-		}// end try block
-		
-		catch (Exception e)
-		{	
-		e.printStackTrace();	
-		return null;
-		}	
-		
-		// Printing the content
-		//System.out.println("Content of file (according to my reader): "+build_string.toString());
-		
-		return build_string.toString();
-	}
 	
 }// end class

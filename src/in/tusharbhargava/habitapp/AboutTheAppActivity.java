@@ -6,6 +6,12 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+/**
+ * This is a simple activity that displays information about the app.
+ * @author Tushar Bhargava
+ *
+ */
+
 public class AboutTheAppActivity extends Activity 
 {
 

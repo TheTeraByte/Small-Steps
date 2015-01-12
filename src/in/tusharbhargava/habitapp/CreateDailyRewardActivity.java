@@ -1,12 +1,9 @@
 package in.tusharbhargava.habitapp;
 
-import java.io.File;
-import java.io.FileOutputStream;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,13 +11,24 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+/**
+ * This activity allows users to add an item to their list of rewards.
+ * @author Tushar Bhargava
+ *
+ */
+
 public class CreateDailyRewardActivity extends Activity
 {
+	// instance variables
+	private ExtStorageWriterAndReader _writer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_daily_reward);
+		
+		// Initializing the file writer
+		_writer=new ExtStorageWriterAndReader();
 		
 		// Gaining control of the widgets in the layout
 		Button add_to_list=(Button)findViewById(R.id.add_reward_to_list_button);
@@ -33,7 +41,7 @@ public class CreateDailyRewardActivity extends Activity
 			public void onClick(View arg0) {
 				String reward_description_text=reward_description_widget.getText().toString()+"\n";
 				// Write reward description to appropriate file
-				writeToFile("Misc/daily_rewards",reward_description_text,true);
+				_writer.writeToFile("Misc/daily_rewards",reward_description_text,true,getApplicationContext());
 				Toast.makeText(getApplicationContext(), "The reward was added to the list.",Toast.LENGTH_SHORT).show();
 				// Returning to main activity
 				Intent main_activity=new Intent(CreateDailyRewardActivity.this,MainActivity.class);
@@ -81,59 +89,4 @@ public class CreateDailyRewardActivity extends Activity
 		return true;
 	}// end onOptionsItemSelected
 
-
-	
-	/*---------------------------------Standard Methods-------------------------- */
-	
-	/**
-	 * Function that writes data to (external) Android storage.
-	 * @param fileName
-	 * @param content
-	 */
-	public void writeToFile(String fileName,String content,boolean appendable)
-	{
-		// Output stream to write content to storage
-		FileOutputStream outputStream;
-		
-		if(isExternalStorageWritable())
-		{
-		try
-		{
-			File toWrite=new File(Environment.getExternalStorageDirectory()+"/SmallStepsData/"+fileName+".txt");
-			// Creating the directories if they didn't already exist
-			toWrite.getParentFile().mkdirs();
-			// User can choose whether to append to file or not
-			outputStream=new FileOutputStream(toWrite,appendable);
-			outputStream.write(content.getBytes());
-			outputStream.close();
-		}// end try block
-		
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}//end catch block
-		}// end if statement
-		
-		// If external storage is not available
-		else
-		{
-			// Informing the user of the problem
-			Toast.makeText(getApplicationContext(), "Check external storage availability and try again", Toast.LENGTH_SHORT).show();
-		}// end else statement 
-		
-	}// end writeToFile function
-	
-
-	/* Checks if external storage is available for read and write 
-	 * Adapted from Android docs.
-	 * */
-	public boolean isExternalStorageWritable() {
-	    String state = Environment.getExternalStorageState();
-	    if (Environment.MEDIA_MOUNTED.equals(state)) {
-	        return true;
-	    }
-	    return false;
-	} // end isExternal StorageWritable
-
-	
 }// end class

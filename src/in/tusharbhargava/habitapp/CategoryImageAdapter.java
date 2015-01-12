@@ -15,13 +15,20 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+/**
+ * This class helps load images into the swipe based selector
+ * on the home screen of the app. In order to prevent the memory
+ * from running it out, it decodes images at a slightly lower quality.
+ * @author Tushar Bhargava
+ *
+ */
+
 public class CategoryImageAdapter extends PagerAdapter
 {
 	private Activity _activity;
 	private String[] _resources;
 	private String[] _categoryNames;
 	private LayoutInflater _inflater;
-	private Context context;
 	private final int IMAGE_MAX_SIZE=300; 
 	
 	// constructor
@@ -30,7 +37,6 @@ public class CategoryImageAdapter extends PagerAdapter
 		this._activity=activity;
 		this._resources=resources;
 		this._categoryNames=categoryNames;
-		context=_activity.getApplicationContext();
 	}// end constructor
 	
 	 @Override
@@ -57,13 +63,14 @@ public class CategoryImageAdapter extends PagerAdapter
 		
 	}// end method
 	
+	/**
+	 * This method helps instantiate each image in the list.
+	 */
 	@Override
 	public Object instantiateItem(ViewGroup container, int position)
 	{
 		ImageView imgDisplay;
 		TextView textDisplay;
-		// Trying to update Progress Bar in main activity
-		MainActivity obj=(MainActivity)_activity;
 		// Inflater that takes care of layout
 		_inflater=(LayoutInflater) _activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View view_layout=_inflater.inflate(R.layout.habit_image_display_layout, container,false);
@@ -97,13 +104,13 @@ public class CategoryImageAdapter extends PagerAdapter
 	  
 	    }
 	
-	 /*--------------------------------Standard method-----------------------------*/
+	 /*--------------------------------Standard methods-----------------------------*/
 	 
 	 /** 
 	  * This is a method adapted from SO to avoid the bitmaps from causing an 
-	  * outOfMemory exception. It is slightly hacky at the moment. 
-	  * @param f
-	  * @return
+	  * outOfMemory exception. 
+	  * @param file to decode
+	  * @return decoded bitmap file
 	  * @throws Exception
 	  */
 	 private Bitmap decodeFile(File f) throws Exception{

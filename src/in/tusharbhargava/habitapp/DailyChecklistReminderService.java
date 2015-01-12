@@ -12,8 +12,10 @@ import android.support.v4.app.TaskStackBuilder;
 
 /**
  * This service helps remind the user to check items off his checklist before the 
- * day ends.
- * @author tusharb1995
+ * day ends. This feature is currently not activated for the app (lack of UI) and
+ * will be available in version 2.0.
+ * 
+ * @author Tushar Bhargava
  *
  */
 

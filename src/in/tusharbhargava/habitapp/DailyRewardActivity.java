@@ -7,6 +7,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+/**
+ * A simple activity that displays the user's reward for habit completion.
+ * 
+ * @author Tushar Bhargava
+ */
+
 public class DailyRewardActivity extends Activity
 {
 
@@ -62,6 +68,4 @@ public class DailyRewardActivity extends Activity
 		return true;
 	}// end onOptionsItemSelected
 
-
-	
 }// end class

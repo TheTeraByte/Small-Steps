@@ -1,11 +1,7 @@
 package in.tusharbhargava.habitapp;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -20,33 +16,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
- * To Do list:
- * 1.) Make a file the 'category' folder to store the names of all habits listed under
- * it
- * 2.) Only allow new habit activity to start if current_habit_count is more than 30.
- * Reset current_habit_count each time new habit starts, i.e. ensure user takes only
- * one step at a time (optional)
- * 3.) In 'Create Habit' activity once button is pressed, show toast for confirmation
- * and start intent to go to main menu once again!
+ * This is the main class of the app that has code to display the home page (activity).
+ * The home-page consists of several images and a linked progress bar, and is one of the
+ * more complicated parts of the program, hence this class has significant no. of lines
+ * of code.
  * 
- * Current: Make check-list and link it with score. Make reward text file (interface+
- * display activity)
- * 
- * Debug: For some reason checklist is going out of memory/not working the second time
- * around.
- * Debug: When months are changing the streak functionality is going to go for a 
- * toss (as the I'm subtracting 1 from an integer it will go to 0 not 31 urggghh)
- * 
- * @author tusharb1995
- *
+ * @author Tushar Bhargava
  */
 
 public class MainActivity extends Activity {
 	
-	// global variables
+	// instance variables
+	private ExtStorageWriterAndReader _writerReader;
 	private ViewPager _mPager;
 	private CategoryImageAdapter _mImageAdapter;
 	// Resource links to habit icon images
@@ -63,15 +46,18 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		// Writing the habit images to the SD card so we can access them from there
-		// if they don't already exist
-		if(getFileContent("Images/images_loaded")==null)
+		// Initializing File IO
+		_writerReader=new ExtStorageWriterAndReader();
+		
+		// Writing the habit images to the SD card so we can access them from there,
+		// if they don't already exist.
+		if(_writerReader.getFileContent("Images/images_loaded")==null)
 		{
 			System.out.println("Running memory intensive one-time (hopefully) image writer!");
 			// Writing a file to the Images directory that serves as a boolean to let
 			// us know the next time that we don't need to write the files
 			// again 
-			writeToFile("Images/images_loaded","true",false);
+			_writerReader.writeToFile("Images/images_loaded","true",false,getApplicationContext());
 			
 			// Loading the images as bitmaps 
 			Bitmap tux=BitmapFactory.decodeResource(getResources(), R.drawable.tux_graduate);
@@ -174,6 +160,7 @@ public class MainActivity extends Activity {
 		
 	}// end onCreate function
 
+	// Provides the in-app menu.
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -181,6 +168,7 @@ public class MainActivity extends Activity {
 		return true;
 	}// end onCreateOptionsMenu
 	
+	// Defines the actions performed by choosing items from the in-app menu.
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
@@ -212,7 +200,9 @@ public class MainActivity extends Activity {
 
 	/*-------------------------Standard Methods-------------------------------- */
 	
-	
+	/**
+	 * Displays stored progress data visually, in the form of XP points and level.
+	 */
 	public void updateProgressBar()
 	{
 		// Finding current habit category
@@ -224,7 +214,7 @@ public class MainActivity extends Activity {
 		TextView current_score_label=(TextView)findViewById(R.id.current_progress_label_textview);
 		TextView current_level_label=(TextView)findViewById(R.id.current_level_label_textview);
 		// Getting score of given habit category (if any) 
-		String habit_score_string=getFileContent(category+"/category_score");
+		String habit_score_string=_writerReader.getFileContent(category+"/category_score");
 		
 		int habit_score=0;
 		
@@ -240,105 +230,5 @@ public class MainActivity extends Activity {
 		// Setting current level label for progress bar
 		current_level_label.setText("Lvl "+Integer.toString(habit_score/MainActivity.xp_to_next_level));
 		
-	}// end method
-	
-	/**
-	 * This function returns file content as a string from external storage.
-	 * @param The name of the file (which is same as the habit name with a post-fix)
-	 * must be provided. 
-	 * @return content of file
-	 */
-	public String getFileContent(String fileName) 
-	{
-		String temp;
-		StringBuilder build_string=null;
-		FileInputStream input;
-		InputStreamReader input_stream_reader;
-		BufferedReader buffered_reader;
-		
-		try
-		{
-		input=new FileInputStream(new File(Environment.getExternalStorageDirectory()+"/SmallStepsData/"+fileName+".txt"));
-		input_stream_reader=new InputStreamReader(input);
-		buffered_reader=new BufferedReader(input_stream_reader,8192);
-		build_string=new StringBuilder();
-		while((temp=buffered_reader.readLine())!=null)
-		{
-			build_string.append(temp+"\r\n");
-		}// end while loop
-				
-		// Closing the streams
-		buffered_reader.close();
-		
-		}// end try block
-		
-		catch (FileNotFoundException f)
-		{	
-			f.printStackTrace();
-			// If file does not exist than we return null to calling method.
-			return null;
-		}	
-		
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		// Printing the content
-		//System.out.println("Content of file (according to my reader): "+build_string.toString());
-		
-		return build_string.toString();
-	}// end method
-	
-	/**
-	 * Function that writes data to (external) Android storage.
-	 * @param fileName
-	 * @param content
-	 */
-	public void writeToFile(String fileName,String content,boolean appendable)
-	{
-		// Output stream to write content to storage
-		FileOutputStream outputStream;
-		
-		if(isExternalStorageWritable())
-		{
-		try
-		{
-			File toWrite=new File(Environment.getExternalStorageDirectory()+"/SmallStepsData/"+fileName+".txt");
-			// Creating the directories if they didn't already exist
-			toWrite.getParentFile().mkdirs();
-			// User can choose whether to append to file or not
-			outputStream=new FileOutputStream(toWrite,appendable);
-			outputStream.write(content.getBytes());
-			outputStream.close();
-		}// end try block
-		
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}//end catch block
-		}// end if statement
-		
-		// If external storage is not available
-		else
-		{
-			// Informing the user of the problem
-			Toast.makeText(getApplicationContext(), "Check external storage availability and try again", Toast.LENGTH_SHORT).show();
-		}// end else statement 
-		
-	}// end writeToFile function
-	
-
-	/* Checks if external storage is available for read and write 
-	 * Adapted from Android docs.
-	 * */
-	public boolean isExternalStorageWritable() {
-	    String state = Environment.getExternalStorageState();
-	    if (Environment.MEDIA_MOUNTED.equals(state)) {
-	        return true;
-	    }
-	    return false;
-	} // end isExternal StorageWritable
-	
-
-	
+	}// end method	
 }

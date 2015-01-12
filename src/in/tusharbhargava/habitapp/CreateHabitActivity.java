@@ -1,18 +1,11 @@
 package in.tusharbhargava.habitapp;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.Date;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,18 +17,23 @@ import android.widget.Toast;
 
 /**
  * This activity provides a simple form to help the user create a new habit.
- * This is limited to one new habit per month.
- * To do: Destroy activity once data is collected.
- * @author tusharb1995
+ * 
+ * @author Tushar Bhargava
  *
  */
 
 public class CreateHabitActivity extends Activity {
 
+	// instance variables
+	private ExtStorageWriterAndReader _writerReader;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_habit);
+		
+		// Instantiating File IO
+		_writerReader=new ExtStorageWriterAndReader();
 		
 		// Making the 'Create Habit' button collect all data and store it (and return
 		// to previous activity)
@@ -66,10 +64,10 @@ public class CreateHabitActivity extends Activity {
 				// Writing name of habit to 'habits' file stored in category
 				// This file stores all habits in a given category, allowing us to
 				// display them by category and calculate habit levels.
-				writeToFile("/"+habitCategory+"/habits_under_category",habitName+"\r\n",true);
+				_writerReader.writeToFile("/"+habitCategory+"/habits_under_category",habitName+"\r\n",true,getApplicationContext());
 				
 				// Writing habit description to file
-				writeToFile("/"+habitCategory+"/"+habitName+"_description", habitDescription,false);
+				_writerReader.writeToFile("/"+habitCategory+"/"+habitName+"_description", habitDescription,false,getApplicationContext());
 				
 				int habit_initial_duration;
 				
@@ -87,14 +85,14 @@ public class CreateHabitActivity extends Activity {
 				}// end if statement
 				
 				// Writing habit current duration and final duration to file
-				writeToFile("/"+habitCategory+"/"+habitName+"_duration",Integer.toString(habit_initial_duration),false);
-				writeToFile("/"+habitCategory+"/"+habitName+"_finalDuration",Integer.toString(habit_final_duration_int),false);
+				_writerReader.writeToFile("/"+habitCategory+"/"+habitName+"_duration",Integer.toString(habit_initial_duration),false,getApplicationContext());
+				_writerReader.writeToFile("/"+habitCategory+"/"+habitName+"_finalDuration",Integer.toString(habit_final_duration_int),false,getApplicationContext());
 				
 				// Writing no. of total days habit is performed 
-				writeToFile("/"+habitCategory+"/"+habitName+"_totalDays",Integer.toString(habit_total_days_int),false);
+				_writerReader.writeToFile("/"+habitCategory+"/"+habitName+"_totalDays",Integer.toString(habit_total_days_int),false,getApplicationContext());
 				
 				// Updating category score
-				String curr_category_score_string=getFileContent("/"+habitCategory+"/category_score");
+				String curr_category_score_string=_writerReader.getFileContent("/"+habitCategory+"/category_score");
 				int category_score=0;
 				if(curr_category_score_string!=null)
 				{
@@ -105,17 +103,17 @@ public class CreateHabitActivity extends Activity {
 				category_score+=(habit_total_days_int*20);
 				
 				// Writing the new score to file
-				writeToFile("/"+habitCategory+"/category_score",Integer.toString(category_score),false);
+				_writerReader.writeToFile("/"+habitCategory+"/category_score",Integer.toString(category_score),false,getApplicationContext());
 				
 				// Writing no. of days habit performed in row (i.e. streak)
 				// Default value is 0
-				writeToFile("/"+habitCategory+"/"+habitName+"_streak",Integer.toString(0),false);
+				_writerReader.writeToFile("/"+habitCategory+"/"+habitName+"_streak",Integer.toString(0),false,getApplicationContext());
 				// Also writing the date the habit was performed (if its not equal to previous
 				// day than streak gets broken) 
 				Calendar c=Calendar.getInstance();
 				int curr_date=c.get(Calendar.DATE);
 				
-				writeToFile("/"+habitCategory+"/"+habitName+"_streakDate",String.valueOf(curr_date),false);
+				_writerReader.writeToFile("/"+habitCategory+"/"+habitName+"_streakDate",String.valueOf(curr_date),false,getApplicationContext());
 						
 				// Notifying user that the habit has been created and re-directing to main
 				// activity
@@ -163,115 +161,12 @@ public class CreateHabitActivity extends Activity {
 		return true;
 	}// end onOptionsItemSelected
 
-
-	
-	
+		
 	/*-------------------------------Standard Methods--------------------------- */
-	
-	/**
-	 * Function that writes data to (external) Android storage.
-	 * @param fileName
-	 * @param content
-	 */
-	public void writeToFile(String fileName,String content,boolean appendable)
-	{
-		// Output stream to write content to storage
-		FileOutputStream outputStream;
 		
-		if(isExternalStorageWritable())
-		{
-		try
-		{
-			File toWrite=new File(Environment.getExternalStorageDirectory()+"/SmallStepsData/"+fileName+".txt");
-			// Creating the directories if they didn't already exist
-			toWrite.getParentFile().mkdirs();
-			// Making outputStream, setting append to true (mainly for habit name 
-			// but this is inconvenient for all other files as it might lead to two
-			// sets of data). Fix later. (To do)
-			outputStream=new FileOutputStream(toWrite,appendable);
-			outputStream.write(content.getBytes());
-			outputStream.close();
-		}// end try block
-		
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}//end catch block
-		}// end if statement
-		
-		// If external storage is not available
-		else
-		{
-			// Informing the user of the problem
-			Toast.makeText(getApplicationContext(), "Check external storage availability and try again", Toast.LENGTH_SHORT).show();
-		}// end else statement 
-		
-	}// end writeToFile function
-	
-
-	/* Checks if external storage is available for read and write 
-	 * Adapted from Android docs.
-	 * */
-	public boolean isExternalStorageWritable() {
-	    String state = Environment.getExternalStorageState();
-	    if (Environment.MEDIA_MOUNTED.equals(state)) {
-	        return true;
-	    }
-	    return false;
-	} // end isExternal StorageWritable
-	
-	
-	/**
-	 * This function returns file content as a string from external storage.
-	 * @param The name of the file (which is same as the habit name with a post-fix)
-	 * must be provided. 
-	 * @return content of file
-	 */
-	public String getFileContent(String fileName) 
-	{
-		String temp;
-		StringBuilder build_string=null;
-		FileInputStream input;
-		InputStreamReader input_stream_reader;
-		BufferedReader buffered_reader;
-		
-		try
-		{
-		input=new FileInputStream(new File(Environment.getExternalStorageDirectory()+"/SmallStepsData/"+fileName+".txt"));
-		input_stream_reader=new InputStreamReader(input);
-		buffered_reader=new BufferedReader(input_stream_reader,8192);
-		build_string=new StringBuilder();
-		while((temp=buffered_reader.readLine())!=null)
-		{
-			build_string.append(temp+"\r\n");
-		}// end while loop
-				
-		// Closing the streams
-		buffered_reader.close();
-		
-		}// end try block
-		
-		catch (FileNotFoundException f)
-		{	
-			f.printStackTrace();
-			// If file does not exist than we return null to calling method.
-			return null;
-		}	
-		
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		// Printing the content
-		//System.out.println("Content of file (according to my reader): "+build_string.toString());
-		
-		return build_string.toString();
-	}// end method
-
-	
 	/**
 	 * This function helps us retrieve the Date from the DatePicker widget. 
-	 * Adapted from StackOverflow: http://stackoverflow.com/questions/8409043/getdate-from-datepicker-android 
+	 * Adapted from SO. 
 	 * @param datePicker
 	 * @return
 	 */
@@ -288,7 +183,7 @@ public class CreateHabitActivity extends Activity {
 	
 	/**
 	 * Gets the date part in the Date object (i.e. doesn't care about hours, minutes etc.
-	 * Adapted from SO: http://stackoverflow.com/a/227049/398715
+	 * Adapted from SO.
 	 * @param date
 	 * @return
 	 */
@@ -305,7 +200,7 @@ public class CreateHabitActivity extends Activity {
 	
 	/**
 	 * Function to calculate (approximately) no. of days between two days.
-	 * Adapted from SO: http://stackoverflow.com/questions/3838527/android-java-date-difference-in-days
+	 * Adapted from SO.
 	 * @param startDate
 	 * @param endDate
 	 * @return

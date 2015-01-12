@@ -25,6 +25,12 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+/*
+ * Android doesn't provide a default Fragment *and* List class. This class
+ * is comprises of code (and comments) from the Android source code for a 
+ * ListActivity with slight modifications to create a List-Fragment.  
+ */
+
 /**
  * An activity that displays a list of items by binding to a data source such as
  * an array or Cursor, and exposes event handlers when the user selects an item.

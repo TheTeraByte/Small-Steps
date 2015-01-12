@@ -1,11 +1,6 @@
 package in.tusharbhargava.habitapp;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -25,17 +20,18 @@ import android.widget.Toast;
  * This class displays the daily check-list and stores ticks for a day.
  * It assigns scores, rewards and level ups. 
  * 
- * Note: Add functionality for displaying "No items to show" if there are no habits
- * (currently it crashes).
- * @author tusharb1995
+ * Note for version 2.0: Generalize categories (possibly through an interface) to
+ * allow easy addition of categories (and thus save repeated code).
+ * 
+ * @author Tushar Bhargava
  *
  */
 
 public class DailyChecklistActivity extends ListActivity
 {
 	
-	// Global Variables
-	
+	// instance variables
+	private ExtStorageWriterAndReader _writerReader;
 	// list of encouragements that app draws on
 	private final String[] immediate_praise={"Go get 'em tiger!","Killing it.","Growing strong, one step at a time!","You're awesome!"};
 	// variable to store list of random rewards (for completing all items on list)
@@ -58,36 +54,34 @@ public class DailyChecklistActivity extends ListActivity
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// Setting the layout (we just need a blank template as this nothing
-		// more than a ListView
+		// more than a ListView)
 		this.setContentView(R.layout.activity_daily_habit_checklist);
 		// Getting control of the ListView that is central to this page
 		ListView checklist_view=this.getListView();
 		
-		// Launching service to remind users to fill checklist at 9:30 PM everyday
-		// Commented out (as may be causing activity to crash)
-		// Update: App does run much faster without service reminder
-	//	Intent checklist_reminder_service=new Intent(this,DailyChecklistReminderService.class);
-	//	startService(checklist_reminder_service);
+		// Initializing File IO
+		_writerReader=new ExtStorageWriterAndReader();
 		
 		// Displaying all 'active' habits (from all categories)
 		ArrayList<String> active_habits=new ArrayList<String>();
 		
 		// 1.) Getting list of habits under 'Academic' 
-		String habits_under_academic_category=getFileContent("Academic"+"/habits_under_category");
+		String habits_under_academic_category=_writerReader.getFileContent("Academic"+"/habits_under_category");
 		// Getting individual habits from list
 		if(habits_under_academic_category!=null)
 		{
 		habits_academic=habits_under_academic_category.split("\r\n");
-		// Adding the Academic habits to the main list of active habits
-		for (String s:habits_academic)
-		{
-			active_habits.add(s);
-			// Incrementing no. of active habits by one
-			total_no_of_habits++;
-		}// end for loop
+			// Adding the Academic habits to the main list of active habits
+			for (String s:habits_academic)
+			{
+				active_habits.add(s);
+				// Incrementing no. of active habits by one
+				total_no_of_habits++;
+			}// end for loop
 		}// end if statement
+		
 		// 2. Getting habits under Computer Science (if there are any) 
-		String habits_under_cs_category=getFileContent("Computer Science"+"/habits_under_category");
+		String habits_under_cs_category=_writerReader.getFileContent("Computer Science"+"/habits_under_category");
 		
 		if(habits_under_cs_category!=null)
 		{
@@ -100,7 +94,7 @@ public class DailyChecklistActivity extends ListActivity
 		}// end if statement
 		
 		// 3.) Getting habits under 'Financial' (if any)
-		String habits_under_financial_s=getFileContent("Financial"+"/habits_under_category");
+		String habits_under_financial_s=_writerReader.getFileContent("Financial"+"/habits_under_category");
 		
 		if(habits_under_financial_s!=null)
 		{
@@ -113,7 +107,7 @@ public class DailyChecklistActivity extends ListActivity
 		}// end if statement
 		
 		// 4.) Getting habits under 'Health' (if any)
-		String habits_under_health_s=getFileContent("Health"+"/habits_under_category");
+		String habits_under_health_s=_writerReader.getFileContent("Health"+"/habits_under_category");
 		
 		if(habits_under_health_s!=null)
 		{
@@ -126,7 +120,7 @@ public class DailyChecklistActivity extends ListActivity
 		}// end if statement
 		
 		// 5.) Getting habits under 'Relationships' (if any)
-		String habits_under_relationships_s=getFileContent("Relationships"+"/habits_under_category");
+		String habits_under_relationships_s=_writerReader.getFileContent("Relationships"+"/habits_under_category");
 		
 		if(habits_under_relationships_s!=null)
 		{
@@ -139,7 +133,7 @@ public class DailyChecklistActivity extends ListActivity
 		}// end if statement
 		
 		// 6.) Getting habits under 'Writing' (if any)
-		String habits_under_writing_s=getFileContent("Writing"+"/habits_under_category");
+		String habits_under_writing_s=_writerReader.getFileContent("Writing"+"/habits_under_category");
 		
 		if(habits_under_writing_s!=null)
 		{
@@ -172,14 +166,16 @@ public class DailyChecklistActivity extends ListActivity
 		// We read the checked_items file and break it into an array of strings
 		// using the new line character
 		
-		String ticks_pos_string_whole=getFileContent("Misc/checked_items");
+		String ticks_pos_string_whole=_writerReader.getFileContent("Misc/checked_items");
 		String[] ticks_pos_string;
+		
 		// Making sure the persistence file exists
 		if(ticks_pos_string_whole!=null)
 		{
 		// Converting string position array into int position
 		ticks_pos_string=ticks_pos_string_whole.split("\n");
 		int[] ticks_pos=new int[ticks_pos_string.length];
+		
 		for (int i=0;i<ticks_pos.length;i++)
 		{
 			// Making sure we don't write a null position
@@ -195,12 +191,13 @@ public class DailyChecklistActivity extends ListActivity
 		
 		// If the checklist needs to be updated to a new day
 		String last_date;
-		String checked_items_date_untrimmed=getFileContent("Misc/checked_items_date");
+		String checked_items_date_untrimmed=_writerReader.getFileContent("Misc/checked_items_date");
 		// Trimming the string for comparison (if its not null that is)
 		if(checked_items_date_untrimmed!=null)
 		{
 			last_date=checked_items_date_untrimmed.trim();
 		}// end trim if statement
+		
 		// If it is null than we make it into a string with a single space
 		else
 		{
@@ -210,7 +207,7 @@ public class DailyChecklistActivity extends ListActivity
 		if(last_date.compareTo(String.valueOf(curr_date-1))==0)
 		{
 			// Setting a new timestamp
-			writeToFile("Misc/checked_items_date",String.valueOf(curr_date),false);
+			_writerReader.writeToFile("Misc/checked_items_date",String.valueOf(curr_date),false,getApplicationContext());
 			
 			// Call to function that updates all the habit data based on the checks
 			// of the previous day
@@ -225,21 +222,21 @@ public class DailyChecklistActivity extends ListActivity
 		else if(last_date==" ")
 		{
 			// Setting a new timestamp
-			writeToFile("Misc/checked_items_date",String.valueOf(curr_date),false);
+			_writerReader.writeToFile("Misc/checked_items_date",String.valueOf(curr_date),false,getApplicationContext());
 			updateHabitsData(ticks_pos,checklist_view);
 		}
 		
 		// If we're still on the old day
 		else
 		{
-		// Checking all the items that were checked earlier (provided time-stamp still
-		// reads current date)
-		for(int pos:ticks_pos)
-		{
-			total_no_of_checked_items++;
-			checklist_view.setItemChecked(pos, true);
-		}// end for loop
-		}// end outer if statement
+			// Checking all the items that were checked earlier (provided time-stamp still
+			// reads current date)
+			for(int pos:ticks_pos)
+			{
+				total_no_of_checked_items++;
+				checklist_view.setItemChecked(pos, true);
+			}// end for loop
+			}// end outer if statement
 				
 		}// end else statement
 		
@@ -280,23 +277,17 @@ public class DailyChecklistActivity extends ListActivity
 		}// end switch statement
 		return true;
 	}// end onOptionsItemSelected
-
-
 	
 	@Override
 	public void onListItemClick(ListView parent,View V,int position,long id)
     {
 		// If after the click item becomes checked then the following actions
-		// take place
-		// Note to self: Shouldn't some of these be delayed till the time deadline
-		// passes?
-		// Otherwise for removing check I'll have to remove all this data :-/ 
-		// Maybe just write/remove position?
+		// take place.
 			
 		if(parent.isItemChecked(position))
 		{
 			// 1.) As item is checked, write its position to file (to be exact: append position)
-			writeToFile("Misc/checked_items",Integer.toString(position)+"\n",true);
+			_writerReader.writeToFile("Misc/checked_items",Integer.toString(position)+"\n",true,getApplicationContext());
 			
 			// 2.) Also increment checked items count
 			total_no_of_checked_items++;
@@ -330,7 +321,7 @@ public class DailyChecklistActivity extends ListActivity
 			// Remove item's position from checked_items file
 			
 			// Reading all the positions from checked_items file
-			String curr_checked_pos_whole=getFileContent("Misc/checked_items");
+			String curr_checked_pos_whole=_writerReader.getFileContent("Misc/checked_items");
 			String[] curr_checked_pos=curr_checked_pos_whole.split("\n");
 			// This string array will store the new set of positions (i.e. positions
 			// sans the current unchecked one)
@@ -357,7 +348,7 @@ public class DailyChecklistActivity extends ListActivity
 			}// end for loop
 			
 			// We now overwrite the checked items file 
-			writeToFile("Misc/checked_items",final_checked_items_list.toString(),false);
+			_writerReader.writeToFile("Misc/checked_items",final_checked_items_list.toString(),false,getApplicationContext());
 			
 		}// end else statement
 		
@@ -366,10 +357,10 @@ public class DailyChecklistActivity extends ListActivity
 	
 	/*---------------------------------Standard Functions----------------------*/
 	
-	
+	// Fetches the latest daily reward list from ext. storage.
 	public void updateDailyRewards()
 	{
-		String rewards_whole=getFileContent("Misc/daily_rewards");
+		String rewards_whole=_writerReader.getFileContent("Misc/daily_rewards");
 		if(!rewards_whole.equals(null))
 		{
 			String[] rewards=rewards_whole.split("\n");
@@ -380,15 +371,16 @@ public class DailyChecklistActivity extends ListActivity
 		}// end if statement
 	}// end file 
 	
+	// Writes the latest habit completion info to file.
 	public void updateHabitsData(int[] positions,ListView parent)
 	{
 		if(positions!=null)
 		{
-		// Updating all of the items at position (counting them as 'checked')
-		for(int pos:positions)
-		{
-			updateHabitDataHelperMethod(pos,parent);
-		}// end for loop
+			// Updating all of the items at position (counting them as 'checked')
+			for(int pos:positions)
+			{
+				updateHabitDataHelperMethod(pos,parent);
+			}// end for loop
 		}// end outer if statement
 	}// end method
 	
@@ -402,16 +394,18 @@ public class DailyChecklistActivity extends ListActivity
 		// 1.) Increasing the habits days and streak count (which later affects
 		// the category score and hence overall avatar level.  
 					
-					// (But first we have to find the category the habit belongs to) 
-					String checked_habit_name=parent.getItemAtPosition(position).toString();
-					String category;
+		// (But first we have to find the category the habit belongs to) 
+		String checked_habit_name=parent.getItemAtPosition(position).toString();
+		String category;
 					
-					// Checking which category habit is in (using an else-if ladder) [To-do]
-					if(hasString(habits_academic,checked_habit_name))
-					{
-						category="Academic";
-					}// end if statement
-					
+		// Checking which category habit is in (using an else-if ladder) [To-do]
+		if(hasString(habits_academic,checked_habit_name))
+		{
+			category="Academic";
+		}// end if statement
+		
+		// Note: Stange error in Eclipse spoiled indentation of following code.
+		
 					else if(hasString(habits_cs,checked_habit_name))
 					{
 						category="Computer Science";
@@ -445,20 +439,20 @@ public class DailyChecklistActivity extends ListActivity
 					}// end else statement
 					
 					// Having found the correct habit category we can now update the relevant data
-					String current_total_no_of_days_s=getFileContent(category+"/"+checked_habit_name+"_totalDays").trim();
+					String current_total_no_of_days_s=_writerReader.getFileContent(category+"/"+checked_habit_name+"_totalDays").trim();
 					// Incrementing no. of days habit performed by one.	
 					int updated_total_no_of_days=Integer.parseInt(current_total_no_of_days_s)+1;		
 					// Re-writing existing days file with new day count
-					writeToFile(category+"/"+checked_habit_name+"_totalDays",Integer.toString(updated_total_no_of_days),false);
+					_writerReader.writeToFile(category+"/"+checked_habit_name+"_totalDays",Integer.toString(updated_total_no_of_days),false,getApplicationContext());
 					// Retrieving date of last time the habit was performed
-					int last_habit_date=Integer.parseInt(getFileContent(category+"/"+checked_habit_name+"_streakDate").trim());
+					int last_habit_date=Integer.parseInt(_writerReader.getFileContent(category+"/"+checked_habit_name+"_streakDate").trim());
 					Calendar c=Calendar.getInstance();
 					int curr_date=c.get(Calendar.DATE);
 					
 					// We update the habit duration if it has been performed for
 					// a certain no. of days
-					int curr_duration=Integer.parseInt(getFileContent(category+"/"+checked_habit_name+"_duration").trim());
-					int final_duration=Integer.parseInt(getFileContent(category+"/"+checked_habit_name+"_finalDuration").trim());
+					int curr_duration=Integer.parseInt(_writerReader.getFileContent(category+"/"+checked_habit_name+"_duration").trim());
+					int final_duration=Integer.parseInt(_writerReader.getFileContent(category+"/"+checked_habit_name+"_finalDuration").trim());
 					
 					// Automatically increasing current duration if its not equal to final duration
 					if(final_duration>curr_duration)
@@ -485,7 +479,7 @@ public class DailyChecklistActivity extends ListActivity
 						curr_duration+=5;
 					}// end else if statement
 					
-					writeToFile(category+"/"+checked_habit_name+"_duration",Integer.toString(curr_duration),false);
+					_writerReader.writeToFile(category+"/"+checked_habit_name+"_duration",Integer.toString(curr_duration),false,getApplicationContext());
 					
 					}// end outer if statement
 					
@@ -497,23 +491,23 @@ public class DailyChecklistActivity extends ListActivity
 					if((curr_date-2)==last_habit_date)
 					{
 					// Incrementing habit streak
-					updated_streak+=Integer.parseInt(getFileContent(category+"/"+checked_habit_name+"_streak").trim())+1;
+					updated_streak+=Integer.parseInt(_writerReader.getFileContent(category+"/"+checked_habit_name+"_streak").trim())+1;
 					// Writing updated habit streak to file (over-writing)
-					writeToFile(category+"/"+checked_habit_name+"_streak",Integer.toString(updated_streak),false);
+					_writerReader.writeToFile(category+"/"+checked_habit_name+"_streak",Integer.toString(updated_streak),false,getApplicationContext());
 					// Writing new streak date to file
-					writeToFile(category+"/"+checked_habit_name+"_streakDate",Integer.toString(curr_date-1),false);
+					_writerReader.writeToFile(category+"/"+checked_habit_name+"_streakDate",Integer.toString(curr_date-1),false,getApplicationContext());
 					}// end if statement 
 					
 					else
 					{
 						// Resetting streak
-						writeToFile(category+"/"+checked_habit_name+"_streak",Integer.toString(0),false);
+						_writerReader.writeToFile(category+"/"+checked_habit_name+"_streak",Integer.toString(0),false,getApplicationContext());
 						// Writing new date to streak habit date
-						writeToFile(category+"/"+checked_habit_name+"_streakDate",Integer.toString(curr_date-1),false);
+						_writerReader.writeToFile(category+"/"+checked_habit_name+"_streakDate",Integer.toString(curr_date-1),false,getApplicationContext());
 					}// end else statement
 					
 					// Updating habit category score (if it exists)
-					String habit_category_curr_score_string=getFileContent(category+"/"+"category_score");
+					String habit_category_curr_score_string=_writerReader.getFileContent(category+"/"+"category_score");
 					int curr_score=0;
 					if(habit_category_curr_score_string!=null)
 					{
@@ -526,7 +520,7 @@ public class DailyChecklistActivity extends ListActivity
 					curr_score+=(updated_streak*20);
 					
 					// Writing updated habit score to file
-					writeToFile(category+"/"+"category_score",Integer.toString(curr_score),false);
+					_writerReader.writeToFile(category+"/"+"category_score",Integer.toString(curr_score),false,getApplicationContext());
 					
 	}// end function
 	
@@ -540,9 +534,10 @@ public class DailyChecklistActivity extends ListActivity
 	 */
 	public boolean hasString(String[] array_to_search,String key)
 	{
-		// Runtime: O(n) but no. of habits of user will probably not be of a large 
-		// magnitude. We're searching every single habit in a given category to find
+		// We're searching every single habit in a given category to find
 		// the key habit.
+		// Runtime: O(n) but no. of habits of user will probably not be of a large 
+		// magnitude.
 		
 		if((array_to_search==null) ||(key==null))
 		{
@@ -575,112 +570,16 @@ public class DailyChecklistActivity extends ListActivity
 		return immediate_praise[randIndex];
 	}// end function
 	
+	/**
+	 * This function chooses a random reward from
+	 * the user's list.
+	 * @return String with description of the reward.
+	 */
 	public String randomDailyRewardGenerator()
 	{
 		int no_of_rewards=daily_rewards.size();
 		int randIndex=(int)(Math.random()*no_of_rewards);
 		return daily_rewards.get(randIndex);
 	}// end function
-	
-	/**
-	 * This function returns file content as a string from external storage.
-	 * @param The name of the file (which is same as the habit name with a post-fix)
-	 * must be provided. 
-	 * @return content of file
-	 */
-	public String getFileContent(String fileName) 
-	{
-		String temp;
-		StringBuilder build_string=null;
-		FileInputStream input;
-		InputStreamReader input_stream_reader;
-		BufferedReader buffered_reader;
 		
-		try
-		{
-		input=new FileInputStream(new File(Environment.getExternalStorageDirectory()+"/SmallStepsData/"+fileName+".txt"));
-		input_stream_reader=new InputStreamReader(input);
-		buffered_reader=new BufferedReader(input_stream_reader,8192);
-		build_string=new StringBuilder();
-		while((temp=buffered_reader.readLine())!=null)
-		{
-			build_string.append(temp+"\r\n");
-		}// end while loop
-				
-		// Closing the streams
-		buffered_reader.close();
-		
-		}// end try block
-		
-		catch (FileNotFoundException f)
-		{	
-			f.printStackTrace();
-			// If file does not exist than we return null to calling method.
-			return null;
-		}	
-		
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		// Printing the content
-		//System.out.println("Content of file (according to my reader): "+build_string.toString());
-		
-		return build_string.toString();
-	}// end method
-	
-	
-
-	/**
-	 * Function that writes data to (external) Android storage.
-	 * @param fileName
-	 * @param content
-	 */
-	public void writeToFile(String fileName,String content,boolean appendable)
-	{
-		// Output stream to write content to storage
-		FileOutputStream outputStream;
-		
-		if(isExternalStorageWritable())
-		{
-		try
-		{
-			File toWrite=new File(Environment.getExternalStorageDirectory()+"/SmallStepsData/"+fileName+".txt");
-			// Creating the directories if they didn't already exist
-			toWrite.getParentFile().mkdirs();
-			// User can choose whether to append to file or not
-			outputStream=new FileOutputStream(toWrite,appendable);
-			outputStream.write(content.getBytes());
-			outputStream.close();
-		}// end try block
-		
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}//end catch block
-		}// end if statement
-		
-		// If external storage is not available
-		else
-		{
-			// Informing the user of the problem
-			Toast.makeText(getApplicationContext(), "Check external storage availability and try again", Toast.LENGTH_SHORT).show();
-		}// end else statement 
-		
-	}// end writeToFile function
-	
-
-	/* Checks if external storage is available for read and write 
-	 * Adapted from Android docs.
-	 * */
-	public boolean isExternalStorageWritable() {
-	    String state = Environment.getExternalStorageState();
-	    if (Environment.MEDIA_MOUNTED.equals(state)) {
-	        return true;
-	    }
-	    return false;
-	} // end isExternal StorageWritable
-	
-
-	
 }// end class
